@@ -2,7 +2,12 @@ package com.test.morningstar.common.app;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+
+import java.util.List;
+
+import butterknife.ButterKnife;
 
 /**
  * @author morningstar
@@ -17,7 +22,9 @@ public abstract class Activity extends AppCompatActivity {
         initWindows();
 
         if(initArgs(getIntent().getExtras())) {
-            getContentLayoutId();
+            // 得到界面Id并设置到界面中
+            int layId = getContentLayoutId();
+            setContentView(layId);
             initWidget();
             initData();
         }else {
@@ -52,7 +59,7 @@ public abstract class Activity extends AppCompatActivity {
      * 初始化控件
      */
     protected void initWidget(){
-
+        ButterKnife.bind(this);
     }
 
     /**
@@ -71,9 +78,24 @@ public abstract class Activity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-//        if() {
-//
-//        }
+        // 得到当前Activity下的所有Fragment
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        // 判断是否为空
+        if(fragments != null && fragments.size() > 0){
+            for (Fragment fragment : fragments) {
+                // 判断是否为我们能够处理的Fragment类型
+                if (fragment instanceof com.test.morningstar.common.app.Fragment){
+                    // 判断是否拦截了返回按钮
+                    if(((com.test.morningstar.common.app.Fragment) fragment).onBackPressed()){
+                        // 如果有直接Return
+                        return;
+                    }
+                }
+            }
+
+
+        }
+
         super.onBackPressed();
         finish();
     }
